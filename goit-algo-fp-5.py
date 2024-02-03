@@ -51,22 +51,6 @@ def get_color_palette(n):
     return palette
 
 
-def draw_heap(array):
-    nodes = [Node(val) for val in array]
-    for i, node in enumerate(nodes):
-        left_index = 2 * i + 1
-        right_index = 2 * i + 2
-        if left_index < len(nodes):
-            node.left = nodes[left_index]
-        if right_index < len(nodes):
-            node.right = nodes[right_index]
-
-    if nodes:
-        tree_root = nodes[0]
-        bfs_assign_colors(tree_root)
-        draw_tree(tree_root)
-
-
 def draw_tree(tree_root):
     tree = nx.DiGraph()
     pos = {(tree_root.val): (0, 0)}
@@ -78,5 +62,43 @@ def draw_tree(tree_root):
     plt.show()
 
 
+def dfs_assign_colors(root, depth=0, visited_order_with_depth=None):
+    if visited_order_with_depth is None:
+        visited_order_with_depth = []
+    if root:
+        visited_order_with_depth.append((root, depth))
+        dfs_assign_colors(root.left, depth+1, visited_order_with_depth)
+        dfs_assign_colors(
+            root.right, depth+1, visited_order_with_depth)
+    if root and len(visited_order_with_depth) == len(nodes):
+        color_palette = get_color_palette(len(visited_order_with_depth))
+        for i, (node, _) in enumerate(visited_order_with_depth):
+            node.color = color_palette[i]
+
+
+def draw_heap(array, traversal_type='BFS'):
+    global nodes
+    nodes = [Node(val) for val in array]
+    for i, node in enumerate(nodes):
+        left_index = 2 * i + 1
+        right_index = 2 * i + 2
+        if left_index < len(nodes):
+            node.left = nodes[left_index]
+        if right_index < len(nodes):
+            node.right = nodes[right_index]
+
+    if nodes:
+        tree_root = nodes[0]
+        if traversal_type == 'BFS':
+            bfs_assign_colors(tree_root)
+        elif traversal_type == 'DFS':
+            dfs_assign_colors(tree_root)
+        draw_tree(tree_root)
+
+
 heap_array = [20, 18, 10, 12, 9, 8, 3, 5, 6]
-draw_heap(heap_array)
+
+print("BFS Traversal and Coloring:")
+draw_heap(heap_array, 'BFS')
+print("DFS Traversal and Coloring:")
+draw_heap(heap_array, 'DFS')
